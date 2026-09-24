@@ -17,3 +17,7 @@ You must strictly adhere to the following rules across the entire codebase befor
 ## 4. Specifications and Architecture Compliance
 - Strictly follow the guidelines defined in `.openspec/specs/` before creating or altering application architecture.
 - Keep database operations restricted to server-side layers (Server Components or Server Actions).
+
+## 5. Branch Naming Conventions
+- Every implementation branch must use the prefix `SLLVT-` followed by a sequential three-digit zero-padded number (e.g., `SLLVT-001`, `SLLVT-002`, `SLLVT-003`, etc.).
+- Append a brief descriptive slug to the identifier when applicable (e.g., `SLLVT-002-db-schema-and-rls`).
