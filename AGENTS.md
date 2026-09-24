@@ -21,3 +21,8 @@ You must strictly adhere to the following rules across the entire codebase befor
 ## 5. Branch Naming Conventions
 - Every implementation branch must use the prefix `SLLVT-` followed by a sequential three-digit zero-padded number (e.g., `SLLVT-001`, `SLLVT-002`, `SLLVT-003`, etc.).
 - Append a brief descriptive slug to the identifier when applicable (e.g., `SLLVT-002-db-schema-and-rls`).
+
+## 6. Project language
+
+- Every comment, function, documentation, etc should be in english language.
+- If any specific documentation or functionality in another language is required, it will be mentioned in the implemented prompt.
