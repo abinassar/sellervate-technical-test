@@ -1,9 +1,19 @@
-<!-- BEGIN:nextjs-agent-rules -->
+# Agent Development Directives
 
-# This is NOT the Next.js you know
+You must strictly adhere to the following rules across the entire codebase before generating, modifying, or proposing any changes:
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+## 1. Declarative Code
+- Write purely declarative, functional code.
+- Prioritize immutability, pure functions, and idiomatic React/Next.js patterns over imperative loops or manual state mutations.
 
-This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+## 2. No Obvious Comments
+- Do not write comments for functions, parameters, components, or logic that explain what the code already demonstrates.
+- Rely on expressive, self-describing naming conventions. Keep the code clean and clutter-free.
 
-<!-- END:nextjs-agent-rules -->
+## 3. DRY Principle and Logic Compression
+- Eliminate duplicate or redundant logic.
+- Extract recurring patterns into clean, reusable utility functions or custom hooks, provided the abstraction preserves clarity and readability.
+
+## 4. Specifications and Architecture Compliance
+- Strictly follow the guidelines defined in `.openspec/specs/` before creating or altering application architecture.
+- Keep database operations restricted to server-side layers (Server Components or Server Actions).
