@@ -17,6 +17,8 @@ export const metadata: Metadata = {
   description: "Proyecto base Next.js con Tailwind, daisyUI y PostgreSQL",
 };
 
+import { ToastProvider } from "@/lib/toast";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -27,7 +29,9 @@ export default function RootLayout({
       lang="es"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <ToastProvider>{children}</ToastProvider>
+      </body>
     </html>
   );
 }
