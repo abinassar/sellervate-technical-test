@@ -4,6 +4,8 @@ import { CreateProductCategoryInput, ProductCategory, ProductCategorySql } from 
 import { CreateProductInput, Product, ProductSql } from "@/lib/types/product";
 import { CreateRoleInput, Role, RoleSql } from "@/lib/types/role";
 import { CreateUserInput, User, UserSql } from "@/lib/types/user";
+import { CreateConversationInput, Conversation, ConversationSql } from "@/lib/types/conversation";
+import { CreateMessageInput, Message, MessageSql } from "@/lib/types/message";
 
 export function mapAuditFieldsFromSql(sqlRow: BaseEntitySql): BaseEntity {
   return {
@@ -190,3 +192,91 @@ export function toCreateProductSql(input: CreateProductInput): Partial<ProductSq
     ...(input.createdBy ? { created_by: input.createdBy } : {}),
   };
 }
+
+export function toConversation(
+  row: ConversationSql,
+  product?: Product,
+  user?: User,
+  customer?: User
+): Conversation {
+  return {
+    ...toDomainEntity<ConversationSql, Conversation>(row, (r) => ({
+      code: r.code,
+      name: r.name,
+      description: r.description,
+      title: r.title,
+      idProduct: r.product_id,
+      idUser: r.user_id,
+      idCustomer: r.customer_id,
+    })),
+    ...(product ? { product } : {}),
+    ...(user ? { user } : {}),
+    ...(customer ? { customer } : {}),
+  };
+}
+
+export function toConversationSql(conversation: Partial<Conversation>): Partial<ConversationSql> {
+  const audit = mapAuditFieldsToSql(conversation);
+  const result: Partial<ConversationSql> = { ...audit };
+  if (conversation.code !== undefined) result.code = conversation.code;
+  if (conversation.name !== undefined) result.name = conversation.name;
+  if (conversation.description !== undefined) result.description = conversation.description;
+  if (conversation.title !== undefined) result.title = conversation.title;
+  if (conversation.idProduct !== undefined) result.product_id = conversation.idProduct;
+  if (conversation.idUser !== undefined) result.user_id = conversation.idUser;
+  if (conversation.idCustomer !== undefined) result.customer_id = conversation.idCustomer;
+  return result;
+}
+
+export function toCreateConversationSql(input: CreateConversationInput): Partial<ConversationSql> {
+  return {
+    ...(input.id ? { id: input.id } : {}),
+    code: input.code,
+    name: input.name,
+    description: input.description,
+    title: input.title,
+    product_id: input.idProduct,
+    user_id: input.idUser,
+    customer_id: input.idCustomer,
+    ...(input.createdBy ? { created_by: input.createdBy } : {}),
+  };
+}
+
+export function toMessage(
+  row: MessageSql,
+  conversation?: Conversation,
+  userAuthor?: User
+): Message {
+  return {
+    ...toDomainEntity<MessageSql, Message>(row, (r) => ({
+      name: r.name,
+      message: r.message,
+      idConversation: r.conversation_id,
+      idUserAuthor: r.user_author_id,
+    })),
+    ...(conversation ? { conversation } : {}),
+    ...(userAuthor ? { userAuthor } : {}),
+  };
+}
+
+export function toMessageSql(msg: Partial<Message>): Partial<MessageSql> {
+  const audit = mapAuditFieldsToSql(msg);
+  const result: Partial<MessageSql> = { ...audit };
+  if (msg.name !== undefined) result.name = msg.name;
+  if (msg.message !== undefined) result.message = msg.message;
+  if (msg.idConversation !== undefined) result.conversation_id = msg.idConversation;
+  if (msg.idUserAuthor !== undefined) result.user_author_id = msg.idUserAuthor;
+  return result;
+}
+
+export function toCreateMessageSql(input: CreateMessageInput): Partial<MessageSql> {
+  return {
+    ...(input.id ? { id: input.id } : {}),
+    name: input.name,
+    message: input.message,
+    conversation_id: input.idConversation,
+    user_author_id: input.idUserAuthor,
+    ...(input.createdBy ? { created_by: input.createdBy } : {}),
+  };
+}
+
