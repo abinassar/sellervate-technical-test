@@ -1,4 +1,7 @@
 import { BaseEntity, BaseEntitySql } from "@/lib/types/base-entity";
+import { CreateBrandInput, Brand, BrandSql } from "@/lib/types/brand";
+import { CreateProductCategoryInput, ProductCategory, ProductCategorySql } from "@/lib/types/product-category";
+import { CreateProductInput, Product, ProductSql } from "@/lib/types/product";
 import { CreateRoleInput, Role, RoleSql } from "@/lib/types/role";
 import { CreateUserInput, User, UserSql } from "@/lib/types/user";
 
@@ -91,6 +94,99 @@ export function toCreateUserSql(input: CreateUserInput): Partial<UserSql> {
     name: input.name,
     lastname: input.lastname,
     role_id: input.idRole,
+    ...(input.createdBy ? { created_by: input.createdBy } : {}),
+  };
+}
+
+export function toBrand(row: BrandSql): Brand {
+  return toDomainEntity<BrandSql, Brand>(row, (r) => ({
+    code: r.code,
+    name: r.name,
+    description: r.description,
+  }));
+}
+
+export function toBrandSql(brand: Partial<Brand>): Partial<BrandSql> {
+  const audit = mapAuditFieldsToSql(brand);
+  const result: Partial<BrandSql> = { ...audit };
+  if (brand.code !== undefined) result.code = brand.code;
+  if (brand.name !== undefined) result.name = brand.name;
+  if (brand.description !== undefined) result.description = brand.description;
+  return result;
+}
+
+export function toCreateBrandSql(input: CreateBrandInput): Partial<BrandSql> {
+  return {
+    ...(input.id ? { id: input.id } : {}),
+    code: input.code,
+    name: input.name,
+    description: input.description,
+    ...(input.createdBy ? { created_by: input.createdBy } : {}),
+  };
+}
+
+export function toProductCategory(row: ProductCategorySql, brand?: Brand): ProductCategory {
+  return {
+    ...toDomainEntity<ProductCategorySql, ProductCategory>(row, (r) => ({
+      code: r.code,
+      name: r.name,
+      description: r.description,
+      idBrand: r.brand_id,
+    })),
+    ...(brand ? { brand } : {}),
+  };
+}
+
+export function toProductCategorySql(category: Partial<ProductCategory>): Partial<ProductCategorySql> {
+  const audit = mapAuditFieldsToSql(category);
+  const result: Partial<ProductCategorySql> = { ...audit };
+  if (category.code !== undefined) result.code = category.code;
+  if (category.name !== undefined) result.name = category.name;
+  if (category.description !== undefined) result.description = category.description;
+  if (category.idBrand !== undefined) result.brand_id = category.idBrand;
+  return result;
+}
+
+export function toCreateProductCategorySql(input: CreateProductCategoryInput): Partial<ProductCategorySql> {
+  return {
+    ...(input.id ? { id: input.id } : {}),
+    code: input.code,
+    name: input.name,
+    description: input.description,
+    brand_id: input.idBrand,
+    ...(input.createdBy ? { created_by: input.createdBy } : {}),
+  };
+}
+
+export function toProduct(row: ProductSql, category?: ProductCategory): Product {
+  return {
+    ...toDomainEntity<ProductSql, Product>(row, (r) => ({
+      code: r.code,
+      name: r.name,
+      description: r.description,
+      idCategory: r.category_id,
+    })),
+    ...(category ? { category } : {}),
+  };
+}
+
+export function toProductSql(product: Partial<Product>): Partial<ProductSql> {
+  const audit = mapAuditFieldsToSql(product);
+  const result: Partial<ProductSql> = { ...audit };
+  if (product.code !== undefined) result.code = product.code;
+  if (product.name !== undefined) result.name = product.name;
+  if (product.description !== undefined) result.description = product.description;
+  if (product.idCategory !== undefined) result.category_id = product.idCategory;
+  return result;
+}
+
+export function toCreateProductSql(input: CreateProductInput): Partial<ProductSql> {
+  return {
+    ...(input.id ? { id: input.id } : {}),
+    code: input.code,
+    name: input.name,
+    description: input.description,
+    category_id: input.idCategory,
     ...(input.createdBy ? { created_by: input.createdBy } : {}),
   };
 }
