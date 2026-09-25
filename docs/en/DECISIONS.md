@@ -41,6 +41,7 @@ The relational schema separates tenancy and operational concerns:
   - Automated PostgreSQL `BEFORE UPDATE` trigger guarantees `updated_at` accuracy.
   - Soft-delete strategy isolates active records (`WHERE deleted_at IS NULL`) while preserving historical audit trails.
   - Bidirectional mappers reconcile SQL `snake_case` with TypeScript `camelCase` domain properties.
+- **`roles` & `users`**: Canonical RBAC foundation inheriting `BaseEntity`. `roles` defines unique system capability codes (`SPECIALIST`, `TEAM_LEAD`, `ADMIN`); `users` establishes user identity (`name`, `lastname`) bound to `idRole` (`role_id`) with declarative server/client discrimination guards.
 - **`brands` & `brand_assignments`**: Defines brand configurations and binds team leads and specialists to authorized brands.
 - **`products` & `procedures`**: Hierarchical product catalog with brand guidelines, resolution procedures, and FAQs.
 - **`conversations` & `messages`**: Historic customer-specialist threads, recording response timestamps and message content.
