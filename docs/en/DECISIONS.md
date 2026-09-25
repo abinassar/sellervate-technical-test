@@ -5,74 +5,76 @@
 ## 1. Product
 
 ### The Real Problem
-Sellervate sells customer experience under the guise of the client's brand. The actual product is the quality and tone of specialist replies. The operational bottleneck is not message delivery, but asynchronous quality assurance: team leads lack a systematic loop to review replies against brand-specific procedures, specialists lack visibility into their coaching feedback, and clients cannot be given empirical proof of quarter-over-quarter improvement.
+Sellervate manages customer experience operating under the identity of the client brand. The actual product is the quality and tone of responses delivered by specialists. The operational bottleneck does not lie in message delivery, but in asynchronous quality assurance: supervisors lack a systematic workflow to quickly audit responses against brand-specific procedures, as well as metrics that pinpoint areas of improvement where specialists need to focus.
+
+On the other hand, specialists lack visibility into their improvement observations, and there is no quantitative evidence to demonstrate their progress to clients over time.
 
 ### What Was Built First and Why
-We prioritized the **Core Review & Coaching Loop**:
-1. **Team Lead Review Stream**: Rapid inspection of sent conversations and individual specialist replies, enabling qualitative and quantitative scoring paired with actionable feedback.
-2. **Specialist Performance & Coaching Hub**: A private view for specialists to inspect supervisor observations, review their own ratings, and track their performance trends.
-3. **Brand Context & Procedure Reference**: Embedding brand tone guides and product-level FAQs directly alongside conversations so evaluations are grounded in concrete brand standards.
+We prioritized the **Core Review and Coaching Workflow**:
+1. **Supervisor Audit Workflow**: Agile inspection of sent conversations and individual responses, allowing quantitative and qualitative ratings paired with feedback comments.
+2. **Specialist Performance Dashboard**: Private view for each specialist to check their scores, supervisor feedback, and metric trends.
 
 ### What Was Left Out and Why
-- **Live Helpdesk / Customer Messaging Inbox**: This tool is strictly post-hoc review. Integrating active customer ticketing would distract from QA judgement workflows.
-- **In-App AI Auto-Scoring in V1**: As noted in the exercise guidelines, building an automated scoring model wrapper creates a brittle proxy for human judgement and burns precious time better spent on authorization and the core review loop.
-- **Full OAuth/SSO Authentication Provider**: Replaced with an active User Switcher to allow instant role verification while enforcing server-side authorization boundaries.
+
+- **Heavy Authentication Provider (OAuth/SSO)**: Replaced by an accessible *User Switcher* for local testing that delegates strict permission validation to the server. Left out due to the required development time.
+
+- **Procedural Reference**: Embedding tone guidelines and product FAQs alongside conversations so evaluations are grounded in real standards.
+
+- **Documentation Reference**: Embedding documentation associated with specific products to guide specialists during communication. Left out due to time constraints and necessary data model modifications.
+
+- **Live Chat Between Users**: Enabling real-time communication between system users to resolve doubts on how to handle conversations. Left out due to the required development time.
+
+- **Report Generation**: Providing the ability to evaluate and export metrics from conversation and message weighting to better identify improvement points for each specialist. Left out due to the required development time.
+
+- **Change Log Audit**: Leveraging system roles, a generic entity is proposed to track changes made across each entity in the system, maintaining control over system modifications and enabling auditability.
 
 ### Where an AI Model Belongs (V2 Vision)
-In a V2 environment, an LLM model would sit as an **asynchronous queue triage filter**:
-- **Role**: Passively analyze outgoing specialist replies against brand procedure embeddings and customer sentiment to flag high-risk anomalies (e.g., offering immediate refunds without diagnosis, or missing order history checks) for priority human review.
-- **Prerequisites for Trust**: High precision / low false-positive rate, confidence calibration, human-in-the-loop validation before applying any score, and zero automated disciplinary action.
-
-### Questions for Stakeholders Before V2
-1. What automated ingestion pipeline or webhook protocols will connect directly to Zendesk/Gorgias/Front helpdesks?
-2. What custom SLA thresholds and weighted scoring rubrics exist across enterprise vs. commodity brand tiers?
-3. Should specialists be able to dispute or open a feedback dialogue directly on specific supervisor reviews?
+In a V2 version, an AI model would serve in the following points:
+- **Evaluate conversation flows**: Analyze outgoing replies against brand procedures to flag critical anomalies (e.g., offering refunds without prior diagnosis or ignoring order history) and prioritize them for human review.
+- **Documentation Agent**: Based on the managed product, provide analysis against configured documentation to assist specialists when they have doubts regarding their message or procedure.
 
 ---
 
 ## 2. Architecture
 
 ### Why This Shape
-We chose Next.js 16 (App Router) with TypeScript, Tailwind CSS, daisyUI, and Postgres via Supabase. Server Components and Server Actions provide an idiomatic, declarative architecture that eliminates unnecessary client-side state mutations while keeping database queries strictly on the server layer.
+The following points outline the methodology and principles implemented for the solution:
+
+  - The conceptual framework and "What I want, What I have, How I do it" methodology in `project-base-concepts.md` details the foundational concept upon which the solution is built, simplifying and breaking down the implementation into sub-tasks.
+  - The aforementioned point is also grounded in understanding both the problem and the business context; while starting from some ambiguous concepts, it allows identifying improvement points and framing the system's operating rules to obtain the accurate information needed to solve the presented problem.
+  - Each OpenSpec specification within `/openspec/specs` serves as the foundation for future implementations.
+  - Used a Docker container with PostgreSQL and dependency configuration, facilitating seed data insertion into the project.
 
 ### Data Model Design
-The relational schema separates tenancy and operational concerns:
-- **`BaseEntity` Foundation**: All entity tables and models inherit canonical primary key and audit metadata: `id` (UUID), `created_at` / `updated_at` / `deleted_at` (`TIMESTAMPTZ`), and `created_by` / `updated_by` / `deleted_by` (`UUID NULL`).
-  - Automated PostgreSQL `BEFORE UPDATE` trigger guarantees `updated_at` accuracy.
-  - Soft-delete strategy isolates active records (`WHERE deleted_at IS NULL`) while preserving historical audit trails.
-  - Bidirectional mappers reconcile SQL `snake_case` with TypeScript `camelCase` domain properties.
-- **`roles` & `users`**: Canonical RBAC foundation inheriting `BaseEntity`. `roles` defines unique system capability codes (`SPECIALIST`, `TEAM_LEAD`, `ADMIN`); `users` establishes user identity (`name`, `lastname`) bound to `idRole` (`role_id`) with declarative server/client discrimination guards.
-- **`brands` & `brand_assignments`**: Defines brand configurations and binds team leads and specialists to authorized brands.
-- **`products` & `procedures`**: Hierarchical product catalog with brand guidelines, resolution procedures, and FAQs.
-- **`conversations` & `messages`**: Historic customer-specialist threads, recording response timestamps and message content.
-- **`evaluations` & `evaluation_comments`**: Post-hoc reviews linked at both conversation and message levels, recording score values, categories, and supervisor critique.
+The relational schema separates multi-tenant brand isolation and operations:
+- **`BaseEntity` Foundation Structure**: All entity tables and models inherit canonical primary keys and audit metadata: `id` (UUID), `created_at` / `updated_at` / `deleted_at` (`TIMESTAMPTZ`), and `created_by` / `updated_by` / `deleted_by` (`UUID NULL`), simplifying the implementation of future entities.
+  - Automated `BEFORE UPDATE` trigger in PostgreSQL guaranteeing `updated_at` accuracy.
+  - Soft-delete strategy isolating active records (`WHERE deleted_at IS NULL`) while preserving historical audit trails.
+  - Bidirectional mappers reconciling SQL `snake_case` with TypeScript `camelCase` domain properties.
+- **`roles` and `users`**: Canonical Role-Based Access Control (RBAC) foundation inheriting from `BaseEntity`. `roles` defines unique system capability codes (`SPECIALIST`, `TEAM_LEAD`, `ADMIN`); `users` defines identity data (`name`, `lastname`) bound to `idRole` (`role_id`) with declarative guard functions for server and UI discrimination.
+- **`brands` and `brand_assignments`**: Brand configuration and binding of authorized supervisors/specialists.
+- **`products` and `procedures`**: Hierarchical product catalog with tone guides, procedures, and FAQs.
+- **`conversations` and `messages`**: Timestamped thread history between customer and specialist.
+- **`evaluations` and `evaluation_comments`**: Reviews linked at conversation and message levels with qualitative notes.
 
-### How Authorisation Is Enforced
-- **Server-Side Enforcement**: The active user session (simulated via secure cookie in development) is resolved exclusively on the server.
+### How Authorization Is Enforced
+- **Server-Side Enforcement**: The active session (simulated via secure cookie) is resolved on the server.
 - **Isolation Rules**:
-  - Specialists querying the database receive strictly their own conversations, messages, and evaluations. Any direct API/action attempt to access cross-specialist or unauthorized brand data returns a 403 Forbidden.
-  - Team Leads access all conversations and evaluations within their assigned brands.
-- **Transition to Real Auth**: In production, the session resolver seamlessly maps to Supabase Auth JWT tokens (`auth.uid()`) without altering data layer authorization rules.
-
-### What Breaks First as This Grows
-- **Metrics Aggregation at Scale**: On-the-fly SQL aggregations for brand score trends will require indexed materialized views or periodic background rollup jobs once message volume exceeds hundreds of thousands of rows.
-- **Multi-channel Ingestion Rate**: Direct webhooks from multiple external helpdesks will require an asynchronous message broker (e.g., Redis / BullMQ or Kafka) to buffer queue ingestion.
+  - Specialists can only query their own conversations, messages, and evaluations. Any attempt to access data from another specialist or unassigned brands is rejected by the server with an authorization error.
+  - Supervisors only have access to brands assigned to them.
+- **Evolution to Real Authentication**: In production, the session resolver connects directly to Supabase Auth JWT tokens (`auth.uid()`) without modifying the database authorization logic.
 
 ---
 
 ## 3. AI (Development Process)
 
 ### How We Worked with AI
-Development followed an agentic pair-programming methodology using Google Antigravity and OpenSpec. Spec-driven planning artifacts defined exact acceptance criteria before any code generation took place.
+Development followed an agentic pair-programming methodology using Google Antigravity and OpenSpec. Upfront specification definitions and behavioral contracts precisely guided each code artifact.
 
-### Where the Agent Excelled vs. Manual Overrides
-- **Where AI Excelled**: Rapid scaffolding of relational domain models, declarative UI components, and generating realistic, voice-differentiated seed conversations across diverse brand personas (technical scooter vs. fast packaging).
-- **Where We Overrode the Agent**: Restricting runtime scope (preventing premature AI scoring implementations), enforcing strict server-side authorization boundaries, and strictly adhering to declarative Next.js Server Component patterns.
-
-### Selected Prompt Excerpt
-```markdown
-"Generate realistic seed data for 2 distinct brands: 'Apex Scooters' (demands technical diagnosis before returns) and 'Nova Packaging' (demands concise, 3-line turnaround). Include at least 6 conversations, 3 specialists, and 2 team leads, with deliberate procedural flaws (e.g. failing to check order history) to enable meaningful QA review."
-```
+### Where AI Succeeded vs. Manual Adjustments
+- **Benefit of starting with specifications**: Time invested in key specs—such as the core solution concept or the base project structure—prevented inconsistencies and errors in subsequent features.
+- **AI Successes**: Rapid generation of relational models, declarative UI components, and creation of realistic seed data with distinct tones and deliberate procedural flaws.
+- **Manual Adjustments**: Server authorization testing and strict enforcement of declarative Next.js Server Component patterns. Validation of each completed feature.
 
 ---
 
@@ -80,17 +82,12 @@ Development followed an agentic pair-programming methodology using Google Antigr
 
 ### Current Implementation State
 - **Completed**:
-  - Conceptual framework and "Qué quiero, Qué tengo, Cómo lo hago" methodology in `project-base-concepts.md`.
-  - Bilingual Decisions documentation (`docs/en/DECISIONS.md` and `docs/es/DECISIONS.md`).
-  - OpenSpec capability contracts for `project-documentation` and `core-qa-domain`.
-  - Initial repository layout, Docker PostgreSQL container configuration, and tech stack setup.
-- **Next in Priority Order**:
-  1. Database schema migration scripts and Supabase RLS policies (`SLLVT-002`/`SLLVT-004`).
-  2. Realistic multi-brand seed dataset insertion.
-  3. Team Lead review loop UI & Specialist coaching dashboard.
-  4. Brand quality metric trend charts using Recharts.
-
-### Repository Flag / Trade-off
-- **Flagged Item**: Cookie-based User Switcher in place of full JWT Supabase Auth.
-- **Rationale**: Allowed 100% of available time to focus on domain data modeling, server authorization enforcement, and the QA user journey without getting bogged down in auth provider boilerplate.
-
+  - Messaging and conversation viewing.
+  - Conversation and message scoring/evaluation services.
+  - Role segregation across the system.
+  - Base landing / home interface.
+  - Base navigation with route-level role validation.
+- **Next Priority Order**:
+  1. Conversation scoring in UI.
+  2. Report generation for metrics export.
+  3. Add documentation and FAQ configuration.
