@@ -41,6 +41,7 @@ El esquema relacional separa el aislamiento multimarca y la operativa:
   - Disparador (trigger) automatizado `BEFORE UPDATE` en PostgreSQL que garantiza la exactitud de `updated_at`.
   - Estrategia de borrado lógico (soft delete) que aísla los registros activos (`WHERE deleted_at IS NULL`) preservando el historial de auditoría.
   - Mapeadores bidireccionales que concilian `snake_case` de SQL con propiedades de dominio `camelCase` en TypeScript.
+- **`roles` y `users`**: Base canónica de control de accesos basada en roles (RBAC) heredando de `BaseEntity`. `roles` define códigos únicos del sistema (`SPECIALIST`, `TEAM_LEAD`, `ADMIN`); `users` define los datos de identidad (`name`, `lastname`) asociados a `idRole` (`role_id`) con funciones guardianas declarativas para discriminación en servidor y UI.
 - **`brands` y `brand_assignments`**: Configuración de marcas y vinculación de supervisores/especialistas autorizados.
 - **`products` y `procedures`**: Catálogo jerárquico de productos con guías de tono, procedimientos y FAQs.
 - **`conversations` y `messages`**: Historial de hilos entre cliente y especialista con marcas de tiempo.
