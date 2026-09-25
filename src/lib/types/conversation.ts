@@ -3,6 +3,8 @@ import { Product } from "./product";
 import { QualityLevel } from "./quality-level";
 import { User } from "./user";
 
+import { Message } from "./message";
+
 export interface Conversation extends BaseEntity {
   code: string;
   name: string;
@@ -18,6 +20,8 @@ export interface Conversation extends BaseEntity {
   customer?: User;
   qualityLevel?: QualityLevel | null;
   ratingUser?: User | null;
+  messages?: Message[];
+  messagesCount?: number;
 }
 
 export interface ConversationSql extends BaseEntitySql {
