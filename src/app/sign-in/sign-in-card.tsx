@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { LogIn, User as UserIcon, Shield, Sparkles } from "lucide-react";
 import { User } from "@/lib/types/user";
 import { toastService } from "@/lib/toast";
+import { setSessionUser } from "@/lib/auth/session-storage";
 
 interface SignInCardProps {
   users: User[];
@@ -27,6 +28,7 @@ export function SignInCard({ users }: SignInCardProps) {
     const randomDelayMs = Math.floor(Math.random() * 1500) + 1200;
     await new Promise((resolve) => setTimeout(resolve, randomDelayMs));
 
+    setSessionUser(selectedUser);
     toastService.success(`¡Bienvenido/a, ${selectedUser.name} ${selectedUser.lastname}!`);
 
     startTransition(() => {
