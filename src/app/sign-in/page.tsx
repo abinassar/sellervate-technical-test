@@ -1,4 +1,4 @@
-import { getAllUsersWithRoles } from "@/lib/db/repositories/users.repository";
+import { getStaffUsersWithRoles } from "@/lib/db/repositories/users.repository";
 import { SignInCard } from "./sign-in-card";
 import { User } from "@/lib/types/user";
 
@@ -8,7 +8,7 @@ export default async function SignInPage() {
   let users: User[] = [];
 
   try {
-    users = await getAllUsersWithRoles();
+    users = await getStaffUsersWithRoles();
   } catch {
     users = [];
   }
