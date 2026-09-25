@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore, useCallback } from "react";
+import { useSyncExternalStore, useCallback } from "react";
 import { User } from "@/lib/types/user";
 import {
-  getSessionUser,
   setSessionUser,
   clearSessionUser,
   SESSION_CHANGE_EVENT_NAME,
@@ -21,12 +20,14 @@ function subscribeToSession(callback: () => void): () => void {
   };
 }
 
-export function useSession() {
-  const [isMounted, setIsMounted] = useState<boolean>(false);
+const emptySubscribe = () => () => {};
 
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+export function useSession() {
+  const isClient = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
 
   const rawUser = useSyncExternalStore(
     subscribeToSession,
@@ -34,7 +35,14 @@ export function useSession() {
     () => null
   );
 
-  const user = isMounted && rawUser ? (JSON.parse(rawUser) as User) : isMounted ? getSessionUser() : null;
+  let user: User | null = null;
+  if (isClient && rawUser) {
+    try {
+      user = JSON.parse(rawUser) as User;
+    } catch {
+      user = null;
+    }
+  }
 
   const login = useCallback((newUser: User) => {
     setSessionUser(newUser);
@@ -47,8 +55,9 @@ export function useSession() {
   return {
     user,
     isAuthenticated: Boolean(user),
-    isLoading: !isMounted,
+    isLoading: !isClient,
     login,
     logout,
   };
 }
+
