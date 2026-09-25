@@ -24,7 +24,7 @@ Necesito implementar la siguiente funcion:
 - level: 25
 
 - name: Bueno
-- description: Mensaje o conversación que refleja la respuesta a la inquietud o duda reflejada por el cliente, sin embargo, deja puntos abiertos a más dudas o no expresa de forma explícita toda la idea necesaria para solventar la duda. De forma que, un cliente con algo de conocimiento podrá entenderlo pero otro sin conocimiento absolute quedará aún con dudas.
+- description: Mensaje o conversación que refleja la respuesta a la inquietud o duda reflejada por el cliente, sin embargo, deja puntos abiertos a más dudas o no expresa de forma explícita toda la idea necesaria para solventar la duda. De forma que, un cliente con algo de conocimiento podrá entenderlo pero otro sin conocimiento absoluto quedará aún con dudas.
 - level: 50
 
 - name: Bastante Bueno
