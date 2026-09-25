@@ -30,6 +30,10 @@ export function isAdmin(subject: RoleResolvable): boolean {
   return hasRole(subject, RoleCode.ADMIN);
 }
 
+export function isCustomer(subject: RoleResolvable): boolean {
+  return hasRole(subject, RoleCode.CUSTOMER);
+}
+
 export function hasAnyRole(subject: RoleResolvable, roles: readonly RoleCode[]): boolean {
   const code = extractRoleCode(subject);
   return code !== null && roles.includes(code as RoleCode);

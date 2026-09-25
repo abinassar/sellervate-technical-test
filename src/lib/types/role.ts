@@ -4,6 +4,7 @@ export const RoleCode = {
   ADMIN: "ADMIN",
   TEAM_LEAD: "TEAM_LEAD",
   SPECIALIST: "SPECIALIST",
+  CUSTOMER: "CUSTOMER",
 } as const;
 
 export type RoleCode = (typeof RoleCode)[keyof typeof RoleCode];
