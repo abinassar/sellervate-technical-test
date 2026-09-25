@@ -37,6 +37,10 @@ We chose Next.js 16 (App Router) with TypeScript, Tailwind CSS, daisyUI, and Pos
 
 ### Data Model Design
 The relational schema separates tenancy and operational concerns:
+- **`BaseEntity` Foundation**: All entity tables and models inherit canonical primary key and audit metadata: `id` (UUID), `created_at` / `updated_at` / `deleted_at` (`TIMESTAMPTZ`), and `created_by` / `updated_by` / `deleted_by` (`UUID NULL`).
+  - Automated PostgreSQL `BEFORE UPDATE` trigger guarantees `updated_at` accuracy.
+  - Soft-delete strategy isolates active records (`WHERE deleted_at IS NULL`) while preserving historical audit trails.
+  - Bidirectional mappers reconcile SQL `snake_case` with TypeScript `camelCase` domain properties.
 - **`brands` & `brand_assignments`**: Defines brand configurations and binds team leads and specialists to authorized brands.
 - **`products` & `procedures`**: Hierarchical product catalog with brand guidelines, resolution procedures, and FAQs.
 - **`conversations` & `messages`**: Historic customer-specialist threads, recording response timestamps and message content.
