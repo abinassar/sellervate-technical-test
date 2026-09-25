@@ -37,6 +37,10 @@ Se seleccionó Next.js 16 (App Router) con TypeScript, Tailwind CSS, daisyUI y P
 
 ### Diseño del Modelo de Datos
 El esquema relacional separa el aislamiento multimarca y la operativa:
+- **Estructura Base `BaseEntity`**: Todas las tablas de entidades y modelos heredan identificador primario y metadatos de auditoría canónicos: `id` (UUID), `created_at` / `updated_at` / `deleted_at` (`TIMESTAMPTZ`), y `created_by` / `updated_by` / `deleted_by` (`UUID NULL`).
+  - Disparador (trigger) automatizado `BEFORE UPDATE` en PostgreSQL que garantiza la exactitud de `updated_at`.
+  - Estrategia de borrado lógico (soft delete) que aísla los registros activos (`WHERE deleted_at IS NULL`) preservando el historial de auditoría.
+  - Mapeadores bidireccionales que concilian `snake_case` de SQL con propiedades de dominio `camelCase` en TypeScript.
 - **`brands` y `brand_assignments`**: Configuración de marcas y vinculación de supervisores/especialistas autorizados.
 - **`products` y `procedures`**: Catálogo jerárquico de productos con guías de tono, procedimientos y FAQs.
 - **`conversations` y `messages`**: Historial de hilos entre cliente y especialista con marcas de tiempo.
