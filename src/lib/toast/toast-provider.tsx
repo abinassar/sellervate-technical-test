@@ -75,7 +75,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={value}>
       {children}
-      <div className="toast toast-top toast-end z-50 p-4 gap-2 pointer-events-none">
+      <div className="toast toast-bottom toast-end z-50 p-4 gap-2 pointer-events-none">
         {toasts.map((toast) => {
           const Icon = TOAST_ICONS[toast.type];
           const alertClass = TOAST_CLASSES[toast.type];
@@ -83,7 +83,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
           return (
             <div
               key={toast.id}
-              className={`${alertClass} pointer-events-auto flex items-center justify-between gap-3 text-sm py-3 px-4 rounded-xl border border-black/5 animate-in fade-in slide-in-from-top-2 duration-200`}
+              className={`${alertClass} pointer-events-auto flex items-center justify-between gap-3 text-sm py-3 px-4 rounded-xl border border-black/5 animate-in fade-in slide-in-from-bottom-2 duration-200`}
             >
               <div className="flex items-center gap-2">
                 <Icon className="w-5 h-5 shrink-0" />
