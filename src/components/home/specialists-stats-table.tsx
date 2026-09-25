@@ -71,14 +71,6 @@ export function SpecialistsStatsTable({ specialists }: SpecialistsStatsTableProp
                   {/* Specialist Name & Avatar */}
                   <td className="py-3.5">
                     <div className="flex items-center gap-3">
-                      <div className="avatar placeholder">
-                        <div className="bg-primary/10 text-primary rounded-xl w-9 h-9 font-bold text-xs">
-                          <span>
-                            {stat.specialist.name.charAt(0)}
-                            {stat.specialist.lastname.charAt(0)}
-                          </span>
-                        </div>
-                      </div>
                       <div>
                         <p className="font-bold text-base-content">
                           {stat.specialist.name} {stat.specialist.lastname}
