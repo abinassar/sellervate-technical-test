@@ -5,35 +5,42 @@
 ## 1. Producto (Product)
 
 ### El Problema Real
-Sellervate gestiona la experiencia de cliente operando bajo la identidad de la marca contratante. El producto real es la calidad y el tono de las respuestas emitidas por los especialistas. El cuello de botella no radica en la entrega de mensajes, sino en el aseguramiento asíncrono de la calidad: los supervisores carecen de un flujo sistemático para auditar respuestas frente a procedimientos específicos de marca, los especialistas no tienen visibilidad de sus observaciones de mejora, y no existe evidencia cuantitativa para demostrar a los clientes su progreso trimestre a trimestre.
+Sellervate gestiona la experiencia de cliente operando bajo la identidad de la marca contratante. El producto real es la calidad y el tono de las respuestas emitidas por los especialistas. El cuello de botella no radica en la entrega de mensajes, sino en el aseguramiento asíncrono de la calidad: los supervisores carecen de un flujo sistemático para auditar respuestas de forma rápida frente a procedimientos específicos de marca, así como tampoco tener métricas que permitan precisar puntos de mejora donde los especialistas deben enfocarse.
+
+Por otro lado, los especialistas no tienen visibilidad de sus observaciones de mejora, y no existe evidencia cuantitativa para demostrar a los clientes su progreso a lo largo del tiempo.
 
 ### Qué se Construyó Primero y Por Qué
 Priorizamos el **Flujo Principal de Revisión y Entrenamiento (Coaching)**:
 1. **Flujo de Auditoría del Supervisor**: Inspección ágil de conversaciones y respuestas individuales enviadas, permitiendo calificaciones cuantitativas y cualitativas acompañadas de comentarios de feedback.
 2. **Panel de Desempeño del Especialista**: Vista privada para que cada especialista consulte sus calificaciones, retroalimentación del supervisor y evolución de métricas.
-3. **Contexto de Marca y Referencia Procedimental**: Incorporación de manuales de tono y preguntas frecuentes por producto junto a las conversaciones para que la evaluación esté fundamentada en estándares reales.
 
 ### Qué se Dejó Fuera y Por Qué
-- **Helpdesk en Vivo / Mensajería con Clientes**: Este sistema es estrictamente de auditoría post-hoc. Integrar un chat en vivo desviaría el foco del valor principal de evaluación.
-- **Scoring Automático con IA en V1**: Según las directrices del ejercicio, implementar un modelo en tiempo de ejecución crea una aproximación frágil del juicio humano y consume tiempo crítico que debe dedicarse a la autorización y al flujo de revisión.
-- **Proveedor Pesado de Autenticación (OAuth/SSO)**: Sustituido por un *User Switcher* accesible para pruebas locales que delega la validación estricta de permisos al servidor.
+
+- **Proveedor Pesado de Autenticación (OAuth/SSO)**: Sustituido por un *User Switcher* accesible para pruebas locales que delega la validación estricta de permisos al servidor. Esto dejado fuera por el tiempo de desarrollo que conllevaba.
+
+- **Referencia Procedimental**: Incorporación de manuales de tono y preguntas frecuentes por producto junto a las conversaciones para que la evaluación esté fundamentada en estándares reales.
+
+- **Referencia Documental**: Incorporación de documentación asociada a productos específicos, que oriente al especialista en la comunicación. Se dejó fuera por el tiempo y modificaciones de modelo de datos necesarias para ello.
+
+- **Chat en vivo entre usuarios**: Permitir intercambio de comunicación entre usuarios del sistema, de forma que en tiempo real se puedan solventar dudas en la manera que se maneja una conversación. Dejado fuera por el tiempo que conllevaba el desarrollo.
+
+- **Generación de reportes**: Dar la capacidad de evaluar y exportar métricas de la ponderación de mensajes y conversaciones, de forma que se identifiquen de mejor manera los puntos de mejora según cada especialista. Dejado fuera por el tiempo que conllevaba el desarrollo.
 
 ### Dónde Pertenece un Modelo de IA (Visión V2)
 En una versión V2, un modelo LLM se ubicaría como un **filtro asíncrono de triaje en cola**:
-- **Rol**: Analizar respuestas salientes comparándolas con los procedimientos de la marca para alertar anomalías críticas (ej. ofrecer devoluciones sin diagnóstico previo o ignorar el historial de pedidos) y priorizarlas para revisión humana.
-- **Requisitos de Confianza**: Alta precisión / baja tasa de falsos positivos, calibración de confianza, validación humana previa y ausencia de penalizaciones automáticas.
-
-### Preguntas para los Stakeholders antes de una V2
-1. ¿Qué protocolos de ingestión o webhooks se utilizarán para conectar directamente con plataformas como Zendesk, Gorgias o Front?
-2. ¿Qué umbrales de SLA y matrices de ponderación ponderada existen entre marcas de consumo masivo y marcas técnicas?
-3. ¿Deberían los especialistas poder responder o abrir un hilo de discusión sobre las observaciones recibidas?
+- **Evaluar flujo de conversaciones**: Analizar respuestas salientes comparándolas con los procedimientos de la marca para alertar anomalías críticas (ej. ofrecer devoluciones sin diagnóstico previo o ignorar el historial de pedidos) y priorizarlas para revisión humana.
+- **Agente de documentación**: En base al producto gestionado se puede tener un análisis en base a documentación configurada para asesorar al especialista en caso de tener dudas en su mensaje o procedimiento.
 
 ---
 
 ## 2. Arquitectura (Architecture)
 
 ### Por Qué Esta Estructura
-Se seleccionó Next.js 16 (App Router) con TypeScript, Tailwind CSS, daisyUI y PostgreSQL mediante Supabase. El uso de Server Components y Server Actions proporciona una arquitectura declarativa y funcional, restringiendo el acceso a la base de datos exclusivamente a capas seguras en el servidor.
+En los siguientes puntos se describe la metodología y principios implementados para la solución:
+
+  - El marco conceptual y metodología "Qué quiero, Qué tengo, Cómo lo hago" en `project-base-concepts.md` detalla el concepto base en el cual se establece la solución. De forma que se simplifica y desglosa en sub-tareas la implementación.
+  - Cada especificación de OpenSpec dentro de /openspec/specs sirve de base para futuras implementaciones.
+  - Usado contenedor Docker con PostgreSQL y configuración de dependencias, de forma que facilita la inserción de datos semilla en el proyecto.
 
 ### Diseño del Modelo de Datos
 El esquema relacional separa el aislamiento multimarca y la operativa:
@@ -54,10 +61,6 @@ El esquema relacional separa el aislamiento multimarca y la operativa:
   - Los supervisores tienen acceso únicamente a las marcas que tienen asignadas.
 - **Evolución a Autenticación Real**: En producción, el resolver de sesión se conecta directamente a tokens JWT de Supabase Auth (`auth.uid()`) sin modificar la lógica de autorización en la base de datos.
 
-### Qué Falla Primero al Escalar
-- **Agregación de Métricas en Tiempo Real**: Con cientos de miles de registros, las consultas agregadas al vuelo requerirán vistas materializadas o trabajos en segundo plano (cron rollups).
-- **Tasa de Ingestión Multicanal**: La recepción masiva de webhooks externos requerirá un broker de mensajes asíncrono (ej. Redis / BullMQ) para desacoplar la cola de procesamiento.
-
 ---
 
 ## 3. IA (Proceso de Desarrollo)
@@ -66,13 +69,9 @@ El esquema relacional separa el aislamiento multimarca y la operativa:
 El desarrollo se realizó bajo una metodología de pair-programming agéntico con Google Antigravity y OpenSpec. La definición previa de especificaciones y contratos de comportamiento guió de forma precisa cada artefacto de código.
 
 ### Aciertos de la IA vs. Ajustes Manuales
+- **Beneficio de partir con especificaciones**: La inversión de tiempo en los spec principales como el concepto principal de la solucion o la estructura base del proyecto permitieron prevenir inconsistencias y errores en las funcionalidades siguientes.
 - **Aciertos de la IA**: Generación rápida de modelos relacionales, componentes visuales declarativos y creación de datos semilla realistas con tonos diferenciados y fallas procedimentales deliberadas.
-- **Ajustes Manuales**: Restricción del alcance en tiempo de ejecución (evitando scoring automático prematuro), blindaje de la autorización en servidor y aplicación estricta de patrones declarativos de Next.js Server Components.
-
-### Extracto de Prompt Destacado
-```markdown
-"Genera datos semilla realistas para 2 marcas distintas: 'Apex Scooters' (exige diagnóstico técnico previo a devoluciones) y 'Nova Packaging' (exige respuestas concisas y rápidas en 3 líneas). Incluye al menos 6 conversaciones, 3 especialistas y 2 supervisores, con fallas deliberadas (ej. no revisar historial de órdenes) para evaluar el flujo de QA."
-```
+- **Ajustes Manuales**: Testing de la autorización en servidor y aplicación estricta de patrones declarativos de Next.js Server Components. Validacción de cada funcinalidad realizada.
 
 ---
 
@@ -80,17 +79,13 @@ El desarrollo se realizó bajo una metodología de pair-programming agéntico co
 
 ### Estado Actual de la Implementación
 - **Completado**:
-  - Marco conceptual y metodología "Qué quiero, Qué tengo, Cómo lo hago" en `project-base-concepts.md`.
-  - Documento de Decisiones bilingüe (`docs/en/DECISIONS.md` y `docs/es/DECISIONS.md`).
-  - Especificaciones OpenSpec para `project-documentation` y `core-qa-domain`.
-  - Estructura base del proyecto, contenedor Docker con PostgreSQL y configuración de dependencias.
+  - Visualización de mensajería y conversaciones.
+  - Servicios de ponderación de conversaciones y mensajes.
+  - División de roles en el sistema.
+  - Interfaz de inicio base.
+  - Navegación base con validación de roles en rutas.
 - **Siguiente Orden de Prioridad**:
-  1. Esquema de base de datos y políticas de RLS en Supabase (`SLLVT-002`/`SLLVT-004`).
-  2. Inserción de dataset semilla realista multimarca.
-  3. Interfaz del flujo de revisión para supervisores y panel de coaching para especialistas.
-  4. Gráficos de tendencias y métricas de calidad con Recharts.
-
-### Elemento Notificado en el Repositorio / Compromiso Asumido
-- **Elemento Destacado**: Implementación de *User Switcher* basado en cookies en lugar de integración completa con JWT Supabase Auth.
-- **Justificación**: Permitió concentrar el tiempo disponible en el modelado de dominio, la autorización forzada en servidor y la experiencia de usuario de QA sin sobrecargar el proyecto con configuraciones de proveedores de autenticación.
+  1. Ponderación de conversaciones en UI.
+  2. Generación de reportes para obtener métricas.
+  3. Agregar configuración de documentación y preguntas frecuentes.
 
