@@ -3,19 +3,33 @@
 import { Conversation } from "@/lib/types/conversation";
 import { QualityLevel } from "@/lib/types/quality-level";
 import { User } from "@/lib/types/user";
+import { QualityLevelMetric, SpecialistStats } from "@/lib/types/analytics";
 import { ConversationCard } from "@/components/conversations/conversation-card";
-import { MessageSquare, ShieldCheck, Sparkles, TrendingUp, Layers } from "lucide-react";
+import { QualityDonutChart } from "@/components/home/quality-donut-chart";
+import { SpecialistsStatsTable } from "@/components/home/specialists-stats-table";
+import {
+  MessageSquare,
+  ShieldCheck,
+  Sparkles,
+  TrendingUp,
+  Layers,
+  BarChart3,
+} from "lucide-react";
 
 interface AdminTeamLeadHomeViewProps {
   conversations: Conversation[];
   qualityLevels: QualityLevel[];
   currentUser: User | null;
+  globalQualityDistribution: QualityLevelMetric[];
+  specialistsStats: SpecialistStats[];
 }
 
 export function AdminTeamLeadHomeView({
   conversations,
   qualityLevels,
   currentUser,
+  globalQualityDistribution,
+  specialistsStats,
 }: AdminTeamLeadHomeViewProps) {
   const totalMessagesCount = conversations.reduce(
     (acc, curr) => acc + (curr.messagesCount ?? curr.messages?.length ?? 0),
@@ -23,7 +37,7 @@ export function AdminTeamLeadHomeView({
   );
 
   return (
-    <div className="space-y-6 w-full max-w-7xl mx-auto">
+    <div className="space-y-8 w-full max-w-7xl mx-auto">
       {/* Header & Metrics Summary */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-base-100 p-6 rounded-2xl border border-base-300 shadow-sm">
         <div className="flex items-center gap-3.5">
@@ -65,7 +79,7 @@ export function AdminTeamLeadHomeView({
             <Layers className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-xs opacity-60">Mensajes Auditables</p>
+            <p className="text-xs opacity-60">Mensajes Auditables (Vista previa)</p>
             <p className="text-lg font-bold">{totalMessagesCount}</p>
           </div>
         </div>
@@ -109,7 +123,27 @@ export function AdminTeamLeadHomeView({
           </div>
         )}
       </section>
+
+      {/* Analytics & Performance Section (Below Conversations) */}
+      <section className="space-y-6 pt-4 border-t border-base-300">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 bg-primary/10 text-primary rounded-lg">
+              <BarChart3 className="w-4 h-4" />
+            </div>
+            <h2 className="text-base font-bold text-base-content">
+              Estadísticas Globales y Métricas de Especialistas
+            </h2>
+          </div>
+          <span className="text-xs opacity-60">Métricas acumuladas del sistema</span>
+        </div>
+
+        {/* Donut Chart: Global Quality Level Breakdown */}
+        <QualityDonutChart data={globalQualityDistribution} />
+
+        {/* Specialists Performance Table */}
+        <SpecialistsStatsTable specialists={specialistsStats} />
+      </section>
     </div>
   );
 }
-

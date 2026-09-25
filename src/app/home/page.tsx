@@ -3,13 +3,27 @@ import { Toolbar } from "@/components/layout/toolbar";
 import { RoleHomeDispatcher } from "@/components/home/role-home-dispatcher";
 import { getRecentConversationsWithDetails } from "@/lib/db/repositories/conversations.repository";
 import { getAllQualityLevels } from "@/lib/db/repositories/quality-levels.repository";
+import {
+  getGlobalQualityLevelDistribution,
+  getSpecialistsPerformanceStats,
+  getAllRecentEvaluations,
+} from "@/lib/db/repositories/analytics.repository";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const [conversations, qualityLevels] = await Promise.all([
+  const [
+    conversations,
+    qualityLevels,
+    globalQualityDistribution,
+    specialistsStats,
+    recentEvaluations,
+  ] = await Promise.all([
     getRecentConversationsWithDetails(3),
     getAllQualityLevels(),
+    getGlobalQualityLevelDistribution(),
+    getSpecialistsPerformanceStats(),
+    getAllRecentEvaluations(30),
   ]);
 
   return (
@@ -21,10 +35,12 @@ export default async function HomePage() {
           <RoleHomeDispatcher
             conversations={conversations}
             qualityLevels={qualityLevels}
+            globalQualityDistribution={globalQualityDistribution}
+            specialistsStats={specialistsStats}
+            recentEvaluations={recentEvaluations}
           />
         </main>
       </div>
     </AuthGuard>
   );
 }
-

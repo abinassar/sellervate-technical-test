@@ -3,19 +3,26 @@
 import { Conversation } from "@/lib/types/conversation";
 import { QualityLevel } from "@/lib/types/quality-level";
 import { User } from "@/lib/types/user";
+import { EvaluatedMessageFeedItem, QualityLevelMetric } from "@/lib/types/analytics";
 import { ConversationCard } from "@/components/conversations/conversation-card";
-import { MessageSquare, Sparkles, Award, UserCheck } from "lucide-react";
+import { SpecialistQualityBreakdown } from "@/components/home/specialist-quality-breakdown";
+import { MessageDetail } from "@/components/conversations/message-detail";
+import { MessageSquare, Sparkles, Award, UserCheck, MessageCircle } from "lucide-react";
 
 interface SpecialistHomeViewProps {
   conversations: Conversation[];
   qualityLevels: QualityLevel[];
   currentUser: User | null;
+  qualityDistribution: QualityLevelMetric[];
+  recentEvaluations: EvaluatedMessageFeedItem[];
 }
 
 export function SpecialistHomeView({
   conversations,
   qualityLevels,
   currentUser,
+  qualityDistribution,
+  recentEvaluations,
 }: SpecialistHomeViewProps) {
   // Filter conversations where this specialist was assigned or wrote messages
   const specialistConversations = conversations.filter(
@@ -27,17 +34,10 @@ export function SpecialistHomeView({
   const activeConversations =
     specialistConversations.length > 0 ? specialistConversations : conversations;
 
-  const ratedMessagesCount = activeConversations.reduce(
-    (acc, c) =>
-      acc +
-      (c.messages?.filter(
-        (m) => m.idUserAuthor === currentUser?.id && Boolean(m.idQualityLevel)
-      ).length ?? 0),
-    0
-  );
+  const totalRatedInDistribution = qualityDistribution.reduce((acc, curr) => acc + curr.count, 0);
 
   return (
-    <div className="space-y-6 w-full max-w-7xl mx-auto">
+    <div className="space-y-8 w-full max-w-7xl mx-auto">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-base-100 p-6 rounded-2xl border border-base-300 shadow-sm">
         <div className="flex items-center gap-3.5">
@@ -79,8 +79,8 @@ export function SpecialistHomeView({
             <Award className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-xs opacity-60">Respuestas Ponderadas</p>
-            <p className="text-lg font-bold">{ratedMessagesCount}</p>
+            <p className="text-xs opacity-60">Total Respuestas Evaluadas</p>
+            <p className="text-lg font-bold">{totalRatedInDistribution}</p>
           </div>
         </div>
       </div>
@@ -114,6 +114,41 @@ export function SpecialistHomeView({
             ))}
           </div>
         )}
+      </section>
+
+      {/* Analytics & Evaluations Section (Below Conversations) */}
+      <section className="space-y-6 pt-4 border-t border-base-300">
+        {/* Quality Distribution */}
+        <SpecialistQualityBreakdown data={qualityDistribution} />
+
+        {/* Recent Evaluations & Observations Feed */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 bg-secondary/10 text-secondary rounded-lg">
+                <MessageCircle className="w-4 h-4" />
+              </div>
+              <h3 className="text-base font-bold text-base-content">
+                Últimas Ponderaciones y Observaciones Recibidas
+              </h3>
+            </div>
+            <span className="text-xs opacity-60">Historial de retroalimentación</span>
+          </div>
+
+          {recentEvaluations.length === 0 ? (
+            <div className="card bg-base-100 border border-base-300 p-8 text-center">
+              <p className="text-xs opacity-60">
+                Aún no tienes respuestas evaluadas con observaciones.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {recentEvaluations.map((item) => (
+                <MessageDetail key={item.id} item={item} />
+              ))}
+            </div>
+          )}
+        </div>
       </section>
     </div>
   );
