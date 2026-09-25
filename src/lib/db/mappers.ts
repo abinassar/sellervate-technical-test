@@ -4,6 +4,7 @@ import { CreateProductCategoryInput, ProductCategory, ProductCategorySql } from 
 import { CreateProductInput, Product, ProductSql } from "@/lib/types/product";
 import { CreateRoleInput, Role, RoleSql } from "@/lib/types/role";
 import { CreateUserInput, User, UserSql } from "@/lib/types/user";
+import { CreateQualityLevelInput, QualityLevel, QualityLevelSql } from "@/lib/types/quality-level";
 import { CreateConversationInput, Conversation, ConversationSql } from "@/lib/types/conversation";
 import { CreateMessageInput, Message, MessageSql } from "@/lib/types/message";
 
@@ -96,6 +97,33 @@ export function toCreateUserSql(input: CreateUserInput): Partial<UserSql> {
     name: input.name,
     lastname: input.lastname,
     role_id: input.idRole,
+    ...(input.createdBy ? { created_by: input.createdBy } : {}),
+  };
+}
+
+export function toQualityLevel(row: QualityLevelSql): QualityLevel {
+  return toDomainEntity<QualityLevelSql, QualityLevel>(row, (r) => ({
+    name: r.name,
+    description: r.description,
+    level: r.level,
+  }));
+}
+
+export function toQualityLevelSql(qualityLevel: Partial<QualityLevel>): Partial<QualityLevelSql> {
+  const audit = mapAuditFieldsToSql(qualityLevel);
+  const result: Partial<QualityLevelSql> = { ...audit };
+  if (qualityLevel.name !== undefined) result.name = qualityLevel.name;
+  if (qualityLevel.description !== undefined) result.description = qualityLevel.description;
+  if (qualityLevel.level !== undefined) result.level = qualityLevel.level;
+  return result;
+}
+
+export function toCreateQualityLevelSql(input: CreateQualityLevelInput): Partial<QualityLevelSql> {
+  return {
+    ...(input.id ? { id: input.id } : {}),
+    name: input.name,
+    description: input.description,
+    level: input.level,
     ...(input.createdBy ? { created_by: input.createdBy } : {}),
   };
 }
@@ -197,7 +225,9 @@ export function toConversation(
   row: ConversationSql,
   product?: Product,
   user?: User,
-  customer?: User
+  customer?: User,
+  qualityLevel?: QualityLevel | null,
+  ratingUser?: User | null
 ): Conversation {
   return {
     ...toDomainEntity<ConversationSql, Conversation>(row, (r) => ({
@@ -208,10 +238,14 @@ export function toConversation(
       idProduct: r.product_id,
       idUser: r.user_id,
       idCustomer: r.customer_id,
+      idQualityLevel: r.quality_level_id ?? null,
+      idRatingUser: r.rating_user_id ?? null,
     })),
     ...(product ? { product } : {}),
     ...(user ? { user } : {}),
     ...(customer ? { customer } : {}),
+    ...(qualityLevel !== undefined ? { qualityLevel } : {}),
+    ...(ratingUser !== undefined ? { ratingUser } : {}),
   };
 }
 
@@ -225,6 +259,8 @@ export function toConversationSql(conversation: Partial<Conversation>): Partial<
   if (conversation.idProduct !== undefined) result.product_id = conversation.idProduct;
   if (conversation.idUser !== undefined) result.user_id = conversation.idUser;
   if (conversation.idCustomer !== undefined) result.customer_id = conversation.idCustomer;
+  if (conversation.idQualityLevel !== undefined) result.quality_level_id = conversation.idQualityLevel;
+  if (conversation.idRatingUser !== undefined) result.rating_user_id = conversation.idRatingUser;
   return result;
 }
 
@@ -238,6 +274,8 @@ export function toCreateConversationSql(input: CreateConversationInput): Partial
     product_id: input.idProduct,
     user_id: input.idUser,
     customer_id: input.idCustomer,
+    ...(input.idQualityLevel !== undefined ? { quality_level_id: input.idQualityLevel } : {}),
+    ...(input.idRatingUser !== undefined ? { rating_user_id: input.idRatingUser } : {}),
     ...(input.createdBy ? { created_by: input.createdBy } : {}),
   };
 }
@@ -245,7 +283,9 @@ export function toCreateConversationSql(input: CreateConversationInput): Partial
 export function toMessage(
   row: MessageSql,
   conversation?: Conversation,
-  userAuthor?: User
+  userAuthor?: User,
+  qualityLevel?: QualityLevel | null,
+  ratingUser?: User | null
 ): Message {
   return {
     ...toDomainEntity<MessageSql, Message>(row, (r) => ({
@@ -253,9 +293,13 @@ export function toMessage(
       message: r.message,
       idConversation: r.conversation_id,
       idUserAuthor: r.user_author_id,
+      idQualityLevel: r.quality_level_id ?? null,
+      idRatingUser: r.rating_user_id ?? null,
     })),
     ...(conversation ? { conversation } : {}),
     ...(userAuthor ? { userAuthor } : {}),
+    ...(qualityLevel !== undefined ? { qualityLevel } : {}),
+    ...(ratingUser !== undefined ? { ratingUser } : {}),
   };
 }
 
@@ -266,6 +310,8 @@ export function toMessageSql(msg: Partial<Message>): Partial<MessageSql> {
   if (msg.message !== undefined) result.message = msg.message;
   if (msg.idConversation !== undefined) result.conversation_id = msg.idConversation;
   if (msg.idUserAuthor !== undefined) result.user_author_id = msg.idUserAuthor;
+  if (msg.idQualityLevel !== undefined) result.quality_level_id = msg.idQualityLevel;
+  if (msg.idRatingUser !== undefined) result.rating_user_id = msg.idRatingUser;
   return result;
 }
 
@@ -276,7 +322,8 @@ export function toCreateMessageSql(input: CreateMessageInput): Partial<MessageSq
     message: input.message,
     conversation_id: input.idConversation,
     user_author_id: input.idUserAuthor,
+    ...(input.idQualityLevel !== undefined ? { quality_level_id: input.idQualityLevel } : {}),
+    ...(input.idRatingUser !== undefined ? { rating_user_id: input.idRatingUser } : {}),
     ...(input.createdBy ? { created_by: input.createdBy } : {}),
   };
 }
-

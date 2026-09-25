@@ -1,5 +1,4 @@
 import { RoleCode } from "@/lib/types/role";
-import { User } from "@/lib/types/user";
 
 export type RoleResolvable = string | { code?: string } | { role?: { code?: string } | null } | null | undefined;
 

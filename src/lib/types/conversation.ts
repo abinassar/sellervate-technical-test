@@ -1,5 +1,6 @@
 import { BaseEntity, BaseEntitySql, CreateEntityInput, UpdateEntityInput } from "./base-entity";
 import { Product } from "./product";
+import { QualityLevel } from "./quality-level";
 import { User } from "./user";
 
 export interface Conversation extends BaseEntity {
@@ -10,9 +11,13 @@ export interface Conversation extends BaseEntity {
   idProduct: string;
   idUser: string;
   idCustomer: string;
+  idQualityLevel?: string | null;
+  idRatingUser?: string | null;
   product?: Product;
   user?: User;
   customer?: User;
+  qualityLevel?: QualityLevel | null;
+  ratingUser?: User | null;
 }
 
 export interface ConversationSql extends BaseEntitySql {
@@ -23,6 +28,8 @@ export interface ConversationSql extends BaseEntitySql {
   product_id: string;
   user_id: string;
   customer_id: string;
+  quality_level_id?: string | null;
+  rating_user_id?: string | null;
 }
 
 export type CreateConversationInput = CreateEntityInput<Conversation>;

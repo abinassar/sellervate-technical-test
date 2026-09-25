@@ -1,10 +1,6 @@
-# Capability: conversation-message-domain
+# Spec Delta
 
-## Purpose
-
-Defines the domain contracts, relational database schemas, foreign key relationships, audit columns, and bidirectional data mappers for Conversation and Message entities in the Sellervate QA evaluation platform.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Conversation Entity and Relational Schema
 The system SHALL provide a `Conversation` domain entity and corresponding `conversations` database table inheriting all `BaseEntity` primary key and audit columns (`id`, `created_at`, `updated_at`, `deleted_at`, `created_by`, `updated_by`, `deleted_by`), with domain attributes: `code` (string), `name` (string), `description` (string), `title` (string), `idProduct` (`product_id` in SQL, UUID referencing `products.id`), `idUser` (`user_id` in SQL, UUID referencing `users.id`), `idCustomer` (`customer_id` in SQL, UUID referencing `users.id`), `idQualityLevel` (`quality_level_id` in SQL, nullable UUID referencing `quality_levels.id`), and `idRatingUser` (`rating_user_id` in SQL, nullable UUID referencing `users.id`).
